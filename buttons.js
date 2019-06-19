@@ -58,18 +58,18 @@ Buttonx.prototype.doubleClicked = function () {
 // ----------------------------------------------------------------------------------------
 
 const TextButton = function (text, x, y, thingToDo, enableTestFn = function(){return true}) {
-    Buttonx.call(this, x, y, text.length * 16, 16)
-    this.text = text
-    this.thingToDo = thingToDo
-    this.enabled = enableTestFn
+    Buttonx.call(this, x, y, text.length * 16, 16);
+    this.text = text;
+    this.thingToDo = thingToDo;
+    this.enabled = enableTestFn;
 }
 
-TextButton.prototype = Object.create(Buttonx.prototype)
+TextButton.prototype = Object.create(Buttonx.prototype);
 
 TextButton.prototype.draw = function () {
     fill(200);
     noStroke();
-    rect(this.x, this.y, this.w, this.h)
+    rect(this.x, this.y, this.w, this.h);
     fill(0);
     textAlign(CENTER, CENTER);
     text(this.text, this.x, this.y, this.w, this.h);

@@ -1,5 +1,9 @@
-var sequence = [];
+var pattern;
+var patterns = [];
+var pattnames = [];
+
 var globalButtons = [];
+
 let instruments = [];
 
 function rect_t(x, y, w, h) {
@@ -24,18 +28,28 @@ function preload() {
 function filedropped(dropped) {
   if (dropped.type === 'text') {
     let strings = dropped.data;
-
+    console.log(strings);
   }
 };
 
 
 
 function querySequence(inst, step) {
-  return sequence[inst * 16 + step];
+  let column = patterns[pattern][step];
+  return (column & (1 << inst)) != 0 ? 1 : 0;
 }
 
 function setSequence(inst, step, value) {
-  sequence[inst * 16 + step] = value;
+  if (value) {
+    patterns[pattern][step] |= (1 << inst);
+  } else {
+    patterns[pattern][step] &= ~(1 << inst);
+  }
+  console.log(patterns[pattern]);
+}
+
+function setPattern(patt) {
+  pattern = patt;
 }
 
 
@@ -45,14 +59,10 @@ function setup() {
   c.drop(filedropped)
 
   noSmooth();
-  
-  sequence = [];
+
   globalButtons = [
     new TextButton("CLEAR", 24, 408, () => {  
-      sequence = [];
-      for (let i = 0; i < 16 * 8; i++) {
-        sequence.push(0);
-      }
+      patterns[pattern] = new Array(16).fill(0);
     }),
     new TextButton("PLAY", 6 * 16 + 24, 408, () => {  
       this.playing = true;
@@ -64,14 +74,28 @@ function setup() {
     })
   ]
 
+  pattern = 0;
+
+  this.step = 0;
+  for (let i = 0; i < 16; i++) {
+    let name = "pattern " + i;
+    globalButtons.push(new TextButton(name, 550, i * 24 + 50, () => {
+      setPattern(i);
+    }));
+    pattnames.push(name);
+    for (let j = 0; j < 16; j++) {
+      patterns.push(new Array(16).fill(0));
+    }
+  }
+
   for (let i = 0; i < 16 * 8; i++) {
     globalButtons.push(new StepButton((int)(i / 16), i & 15, querySequence, setSequence));
-    sequence.push(0);
   }
+
+  this.playing = false;
 
   this.tempo = 120;
   this.nextStepTime = 0;
-  this.playing = false;
 };
 
 function draw() {
@@ -79,8 +103,9 @@ function draw() {
     this.nextStepTime = millis() + 15000 / this.tempo;
 
     step = (step + 1) & 15;
+    let col = patterns[pattern][step];
     for (let inst = 0; inst < 8; ++inst) {
-      if (sequence[step + 16 * inst] == 1) {
+      if ((col & (1 << inst)) != 0) {
         instruments[inst].play();
       }
     }
