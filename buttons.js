@@ -86,6 +86,34 @@ TextButton.prototype.mouseClicked = function () {
 
 // ----------------------------------------------------------------------------------------
 
+const VariableTextButton = function (textfn, x, y, w, thingToDo) {
+    Buttonx.call(this, x, y, w, 16);
+    this.thingToDo = thingToDo;
+    this.textfn = textfn;
+}
+
+VariableTextButton.prototype = Object.create(Buttonx.prototype);
+
+VariableTextButton.prototype.draw = function () {
+    fill(200);
+    noStroke();
+    rect(this.x, this.y, this.w, this.h);
+    fill(0);
+    textAlign(CENTER, CENTER);
+    text(this.textfn(), this.x, this.y, this.w, this.h);
+    if (this.state == 1) {
+        this.showHilite();
+    }
+}
+
+VariableTextButton.prototype.mouseClicked = function () {
+    if (this.state == 1) {
+        this.thingToDo();
+    }
+}
+
+// ----------------------------------------------------------------------------------------
+
 const StepButton = function (inst, step, querySeq, updateSeq) {
     Buttonx.call(this, step * 32 + 24, inst * 32 + 50, 16, 16);
     this.step = step;

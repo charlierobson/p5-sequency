@@ -15,23 +15,38 @@ function rect_t(x, y, w, h) {
 
 function preload() {
   soundFormats('wav');
-  instruments[0] = loadSound('assets/KICK');
-  instruments[1] = loadSound('assets/SD1');
-  instruments[2] = loadSound('assets/SYM1');
-  instruments[3] = loadSound('assets/RIM');
+  instruments[0] = loadSound('assets/QUIHA');
+  instruments[1] = loadSound('assets/SYM1');
+  instruments[2] = loadSound('assets/MARC');
+  instruments[3] = loadSound('assets/COW');
   instruments[4] = loadSound('assets/TAMB');
-  instruments[5] = loadSound('assets/QUIHA');
-  instruments[6] = loadSound('assets/MARC');
-  instruments[7] = loadSound('assets/COW');
+  instruments[5] = loadSound('assets/KICK');
+  instruments[6] = loadSound('assets/SD2');
+  instruments[7] = loadSound('assets/GUIRO');
 };
 
 function filedropped(dropped) {
   if (dropped.type === 'text') {
-    let strings = dropped.data;
-    console.log(strings);
+    var patt = 0;
+    var step = 0;
+    let strings = dropped.data.split('\n');
+    for (let strg of strings) {
+      let ts = strg.trim();
+      if (ts.startsWith('//')) {
+        pattnames[patt] = ts.substring(2).trim();
+        console.log(pattnames[patt]);
+      } else if (ts.startsWith('B')) {
+        console.log(ts, ts.substring(1,9), parseInt(ts.substring(1,9), 2));
+        patterns[patt][step] = parseInt(ts.substring(1,9), 2);
+        ++step;
+        if (step == 16) {
+          ++patt;
+          step = 0;
+        }
+      }
+    }
   }
 };
-
 
 
 function querySequence(inst, step) {
@@ -45,13 +60,15 @@ function setSequence(inst, step, value) {
   } else {
     patterns[pattern][step] &= ~(1 << inst);
   }
-  console.log(patterns[pattern]);
 }
 
-function setPattern(patt) {
+function setCurrentPattern(patt) {
   pattern = patt;
 }
 
+function getPatternName(patt) {
+  return pattnames[patt];
+}
 
 function setup() {
   let c = createCanvas(740, 600);
@@ -78,11 +95,8 @@ function setup() {
 
   this.step = 0;
   for (let i = 0; i < 16; i++) {
-    let name = "pattern " + i;
-    globalButtons.push(new TextButton(name, 550, i * 24 + 50, () => {
-      setPattern(i);
-    }));
-    pattnames.push(name);
+    pattnames.push("pattern " + i);
+    globalButtons.push(new VariableTextButton(()=>getPatternName(i), 550, i * 24 + 50, 160, ()=>setCurrentPattern(i)));
     for (let j = 0; j < 16; j++) {
       patterns.push(new Array(16).fill(0));
     }
