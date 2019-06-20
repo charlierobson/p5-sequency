@@ -58,7 +58,7 @@ Buttonx.prototype.doubleClicked = function () {
 // ----------------------------------------------------------------------------------------
 
 const TextButton = function (text, x, y, thingToDo, enableTestFn = function(){return true}) {
-    Buttonx.call(this, x, y, text.length * 16, 16);
+    Buttonx.call(this, x, y, 80, 16);
     this.text = text;
     this.thingToDo = thingToDo;
     this.enabled = enableTestFn;

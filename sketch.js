@@ -2,17 +2,10 @@ var pattern;
 var pattlen;
 var patterns = [];
 var pattnames = [];
+let instruments = [];
 var pcopybuffer = [];
 var globalButtons = [];
 
-let instruments = [];
-
-function rect_t(x, y, w, h) {
-  this.x = x
-  this.y = y,
-  this.w = w,
-  this.h = h
-};
 
 function preload() {
   soundFormats('wav');
@@ -68,6 +61,11 @@ function setCurrentPattern(patt) {
     // OR the new pattern into the current
     for(let step = 0; step < 16; ++step) {
       patterns[pattern][step] |= patterns[patt][step];
+    }
+  } else if (keyIsDown(ALT)) {
+    // XOR the new pattern into the current
+    for(let step = 0; step < 16; ++step) {
+      patterns[pattern][step] ^= patterns[patt][step];
     }
   } else {
     pattern = patt;
