@@ -15,14 +15,14 @@ function rect_t(x, y, w, h) {
 
 function preload() {
   soundFormats('wav');
-  instruments[0] = loadSound('assets/QUIHA');
-  instruments[1] = loadSound('assets/SYM1');
-  instruments[2] = loadSound('assets/MARC');
-  instruments[3] = loadSound('assets/COW');
-  instruments[4] = loadSound('assets/TAMB');
-  instruments[5] = loadSound('assets/KICK');
-  instruments[6] = loadSound('assets/SD2');
-  instruments[7] = loadSound('assets/GUIRO');
+  instruments[0] = loadSound('assets/01');
+  instruments[1] = loadSound('assets/02');
+  instruments[2] = loadSound('assets/03');
+  instruments[3] = loadSound('assets/04');
+  instruments[4] = loadSound('assets/05');
+  instruments[5] = loadSound('assets/06');
+  instruments[6] = loadSound('assets/07');
+  instruments[7] = loadSound('assets/08');
 };
 
 function filedropped(dropped) {
@@ -34,9 +34,7 @@ function filedropped(dropped) {
       let ts = strg.trim();
       if (ts.startsWith('//')) {
         pattnames[patt] = ts.substring(2).trim();
-        console.log(pattnames[patt]);
       } else if (ts.startsWith('B')) {
-        console.log(ts, ts.substring(1,9), parseInt(ts.substring(1,9), 2));
         patterns[patt][step] = parseInt(ts.substring(1,9), 2);
         ++step;
         if (step == 16) {
@@ -63,7 +61,14 @@ function setSequence(inst, step, value) {
 }
 
 function setCurrentPattern(patt) {
-  pattern = patt;
+  if (keyIsDown(SHIFT)) {
+    // OR the new pattern into the current
+    for(let step = 0; step < 16; ++step) {
+      patterns[pattern][step] |= patterns[patt][step];
+    }
+  } else {
+    pattern = patt;
+  }
 }
 
 function getPatternName(patt) {
