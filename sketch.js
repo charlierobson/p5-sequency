@@ -2,7 +2,7 @@ var pattern;
 var pattlen;
 var patterns = [];
 var pattnames = [];
-
+var pcopybuffer = [];
 var globalButtons = [];
 
 let instruments = [];
@@ -87,26 +87,44 @@ function setup() {
   noSmooth();
 
   globalButtons = [
-    new TextButton("CLEAR", 24, 408, () => {  
+    new TextButton("COPY", 24 + (0 * 100), 408, () => {
+      pcopybuffer = [...patterns[pattern]];
+    }),
+    new TextButton("CLEAR", 24 + (1 * 100), 408, () => {  
       patterns[pattern] = new Array(16).fill(0);
     }),
-    new TextButton("PLAY", 6 * 16 + 24, 408, () => {  
+    new TextButton("PASTE", 24 + (2 * 100), 408, () => {
+      patterns[pattern] = [...pcopybuffer];
+    }),
+    new TextButton("PLAY", 24 + (0 * 100), 432, () => {  
       this.playing = true;
       this.step = 15;
       this.nextStepTime = millis() - 1;
     }),
-    new TextButton("STOP", 11 * 16 + 24, 408, () => {
+    new TextButton("STOP", 24 + (1 * 100), 432, () => {
       this.playing = false;
     }),
-    new TextButton("SAVE", 16 * 16 + 24, 408, () => {
+    new TextButton("SAVE", 24 + (2 * 100), 432, () => {
       savePatternData();
     })
   ]
 
+  var ypos = 50;
   for (let i = 0; i < 16; i++) {
     let id = ("0" + i).slice(-2)
     pattnames.push("pattern " + id + " 16");
-    globalButtons.push(new VariableTextButton(()=>getPatternName(i), 550, i * 24 + 50, 160, ()=>setCurrentPattern(i)));
+    globalButtons.push(new VariableTextButton(()=>getPatternName(i), 550, ypos, 160, ()=>setCurrentPattern(i)));
+    ypos += 24;
+    for (let j = 0; j < 16; j++) {
+      patterns.push(new Array(16).fill(0));
+    }
+  }
+
+  for (let i = 0; i < 4; i++) {
+    let id = ("0" + i).slice(-2)
+    pattnames.push("workspace " + id + " 16");
+    globalButtons.push(new VariableTextButton(()=>getPatternName(i+16), 550, ypos, 160, ()=>setCurrentPattern(i+16)));
+    ypos += 24;
     for (let j = 0; j < 16; j++) {
       patterns.push(new Array(16).fill(0));
     }
@@ -151,7 +169,7 @@ function draw() {
 
   stroke(1);
   strokeWeight(1);
-  for (let i = 0; i < 16; ++i) {
+  for (let i = 0; i < 20; ++i) {
     fill(0,40 + (i == pattern ? 200 : 0),0);
     ellipse(720, i * 24 + 60, 10, 10);
   }
