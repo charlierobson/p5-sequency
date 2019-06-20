@@ -80,7 +80,7 @@ function getPatternName(patt) {
 }
 
 function setup() {
-  let c = createCanvas(740, 600);
+  let c = createCanvas(800, 600);
 
   c.drop(filedropped)
 
@@ -147,10 +147,14 @@ function draw() {
     rect(this.step * 32 + 20, 46, 24, 8 * 32 + 8)
   }
 
-  fill(0);
-  noStroke();
-
   tellButtons((x) => { x.draw(); })
+
+  stroke(1);
+  strokeWeight(1);
+  for (let i = 0; i < 16; ++i) {
+    fill(0,40 + (i == pattern ? 200 : 0),0);
+    ellipse(720, i * 24 + 60, 10, 10);
+  }
 };
 
 function tellButtons(thingToDo) {
