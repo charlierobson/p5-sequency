@@ -1,4 +1,5 @@
 var pattern;
+var pattlen;
 var patterns = [];
 var pattnames = [];
 
@@ -32,9 +33,11 @@ function filedropped(dropped) {
     let strings = dropped.data.split('\n');
     for (let strg of strings) {
       let ts = strg.trim();
-      if (ts.startsWith('//')) {
-        pattnames[patt] = ts.substring(2).trim();
-      } else if (ts.startsWith('B')) {
+      let nameo = ts.indexOf('//');
+      if (nameo != -1) {
+        pattnames[patt] = ts.substring(nameo+2).trim();
+      }
+      if (ts.startsWith('B')) {
         patterns[patt][step] = parseInt(ts.substring(1,9), 2);
         ++step;
         if (step == 16) {
@@ -68,6 +71,7 @@ function setCurrentPattern(patt) {
     }
   } else {
     pattern = patt;
+    pattlen = parseInt(pattnames[pattern].slice(-2));
   }
 }
 
@@ -93,14 +97,15 @@ function setup() {
     }),
     new TextButton("STOP", 11 * 16 + 24, 408, () => {
       this.playing = false;
+    }),
+    new TextButton("SAVE", 16 * 16 + 24, 408, () => {
+      savePatternData();
     })
   ]
 
-  pattern = 0;
-
-  this.step = 0;
   for (let i = 0; i < 16; i++) {
-    pattnames.push("pattern " + i);
+    let id = ("0" + i).slice(-2)
+    pattnames.push("pattern " + id + " 16");
     globalButtons.push(new VariableTextButton(()=>getPatternName(i), 550, i * 24 + 50, 160, ()=>setCurrentPattern(i)));
     for (let j = 0; j < 16; j++) {
       patterns.push(new Array(16).fill(0));
@@ -111,17 +116,21 @@ function setup() {
     globalButtons.push(new StepButton((int)(i / 16), i & 15, querySequence, setSequence));
   }
 
-  this.playing = false;
 
+  this.step = 0;
   this.tempo = 120;
+
+  this.playing = false;
   this.nextStepTime = 0;
+
+  setCurrentPattern(0);
 };
 
 function draw() {
   if (this.playing && millis() >= this.nextStepTime) {
     this.nextStepTime = millis() + 15000 / this.tempo;
 
-    step = (step + 1) & 15;
+    step = (step + 1) % pattlen;
     let col = patterns[pattern][step];
     for (let inst = 0; inst < 8; ++inst) {
       if ((col & (1 << inst)) != 0) {
@@ -169,3 +178,18 @@ function mouseDragged() {
 function mousePressed() {
   tellButtons((x) => { x.mousePressed(); })
 };
+
+function savePatternData () {
+  let strings = []
+  for (let patt = 0; patt < 16; ++patt) {
+    for (let step = 0; step < 16; ++step) {
+      var name = '';
+      if (step == 0) { 
+        name  = '\t\t// ' + pattnames[patt];
+      }
+
+      strings.push( 'B' + ('00000000' + (patterns[patt][step] >>> 0).toString(2)).slice(-8) + ',' + name );
+    }
+  }
+  saveStrings(strings, "patterns.txt");
+}
