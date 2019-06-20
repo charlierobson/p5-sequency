@@ -1,9 +1,10 @@
-const Buttonx = function (x, y, w, h) {
+const Buttonx = function (x, y, w, h, toolTip) {
     this.x = x
     this.y = y
     this.w = w
     this.h = h
     this.state = 0
+    this.toolTip = toolTip;
 }
 
 Buttonx.prototype.mouseWithin = function () {
@@ -18,6 +19,13 @@ Buttonx.prototype.showHilite = function () {
     noFill();
     stroke(color(0, 255, 0));
     rect(this.x - 1, this.y - 1, this.w + 2, this.h + 2);
+    textAlign(LEFT, TOP);
+    fill(0);
+    noStroke();
+    let texts = this.toolTip.split('|');
+    for (let i = 0; i < texts.length; ++i) {
+        text(texts[i], 24, 500 + 16 * i);
+    }
 }
 
 Buttonx.prototype.draw = function () {
@@ -57,11 +65,10 @@ Buttonx.prototype.doubleClicked = function () {
 
 // ----------------------------------------------------------------------------------------
 
-const TextButton = function (text, x, y, thingToDo, enableTestFn = function(){return true}) {
-    Buttonx.call(this, x, y, 80, 16);
+const TextButton = function (text, x, y, toolTip, thingToDo) {
+    Buttonx.call(this, x, y, 80, 16, toolTip);
     this.text = text;
     this.thingToDo = thingToDo;
-    this.enabled = enableTestFn;
 }
 
 TextButton.prototype = Object.create(Buttonx.prototype);
@@ -73,7 +80,7 @@ TextButton.prototype.draw = function () {
     fill(0);
     textAlign(CENTER, CENTER);
     text(this.text, this.x, this.y, this.w, this.h);
-    if (this.state == 1 && this.enabled()) {
+    if (this.state == 1) {
         this.showHilite();
     }
 }
@@ -86,8 +93,8 @@ TextButton.prototype.mouseClicked = function () {
 
 // ----------------------------------------------------------------------------------------
 
-const VariableTextButton = function (textfn, x, y, w, thingToDo) {
-    Buttonx.call(this, x, y, w, 16);
+const VariableTextButton = function (textfn, x, y, w, toolTip, thingToDo) {
+    Buttonx.call(this, x, y, w, 16, toolTip);
     this.thingToDo = thingToDo;
     this.textfn = textfn;
 }
@@ -114,8 +121,8 @@ VariableTextButton.prototype.mouseClicked = function () {
 
 // ----------------------------------------------------------------------------------------
 
-const StepButton = function (inst, step, querySeq, updateSeq) {
-    Buttonx.call(this, step * 32 + 24, inst * 32 + 50, 16, 16);
+const StepButton = function (inst, step, toolTip, querySeq, updateSeq) {
+    Buttonx.call(this, step * 32 + 24, inst * 32 + 50, 16, 16, toolTip);
     this.step = step;
     this.inst = inst;
     this.querySeq = querySeq;
@@ -134,6 +141,9 @@ StepButton.prototype.draw = function () {
     stroke(0);
     strokeWeight(1);
     rect(this.x, this.y, 16, 16);
+    if (this.state == 1) {
+        this.showHilite();
+    }
 }
 
 StepButton.prototype.mouseClicked = function () {

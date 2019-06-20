@@ -6,6 +6,14 @@ let instruments = [];
 var pcopybuffer = [];
 var globalButtons = [];
 
+const HT_0 = "Copy the selected pattern to the copy buffer";
+const HT_1 = "Clear the selected pattern";
+const HT_2 = "Paste the copy buffer to the selected pattern";
+const HT_3 = "Play the sequence";
+const HT_4 = "Stop playing";
+const HT_5 = "Save the patterns, excluding workspaces, for inclusion in O2 source";
+const HT_6 = "Select this pattern|(+SHIFT) OR this pattern into selected|(+ALT) XOR this pattern into selected";
+const HT_7 = "Toggle instrument for the step position";
 
 function preload() {
   soundFormats('wav');
@@ -77,6 +85,12 @@ function getPatternName(patt) {
   return pattnames[patt];
 }
 
+function startPlaying() {
+  this.playing = true;
+  this.step = 15;
+  this.nextStepTime = millis() - 1;
+}
+
 function setup() {
   let c = createCanvas(800, 600);
 
@@ -85,33 +99,19 @@ function setup() {
   noSmooth();
 
   globalButtons = [
-    new TextButton("COPY", 24 + (0 * 100), 408, () => {
-      pcopybuffer = [...patterns[pattern]];
-    }),
-    new TextButton("CLEAR", 24 + (1 * 100), 408, () => {  
-      patterns[pattern] = new Array(16).fill(0);
-    }),
-    new TextButton("PASTE", 24 + (2 * 100), 408, () => {
-      patterns[pattern] = [...pcopybuffer];
-    }),
-    new TextButton("PLAY", 24 + (0 * 100), 432, () => {  
-      this.playing = true;
-      this.step = 15;
-      this.nextStepTime = millis() - 1;
-    }),
-    new TextButton("STOP", 24 + (1 * 100), 432, () => {
-      this.playing = false;
-    }),
-    new TextButton("SAVE", 24 + (2 * 100), 432, () => {
-      savePatternData();
-    })
+    new TextButton("COPY", 24 + (0 * 100), 408, HT_0, () => { pcopybuffer = [...patterns[pattern]]; }),
+    new TextButton("CLEAR", 24 + (1 * 100), 408, HT_1, () => { patterns[pattern] = new Array(16).fill(0); }),
+    new TextButton("PASTE", 24 + (2 * 100), 408, HT_2, () => { patterns[pattern] = [...pcopybuffer]; }),
+    new TextButton("PLAY", 24 + (0 * 100), 432, HT_3, () => { startPlaying(); }),
+    new TextButton("STOP", 24 + (1 * 100), 432, HT_4, () => { this.playing = false; }),
+    new TextButton("SAVE", 24 + (2 * 100), 432, HT_5, () => { savePatternData(); })
   ]
 
   var ypos = 50;
   for (let i = 0; i < 16; i++) {
     let id = ("0" + i).slice(-2)
     pattnames.push("pattern " + id + " 16");
-    globalButtons.push(new VariableTextButton(()=>getPatternName(i), 550, ypos, 160, ()=>setCurrentPattern(i)));
+    globalButtons.push(new VariableTextButton(()=>getPatternName(i), 550, ypos, 160, HT_6, ()=>setCurrentPattern(i)));
     ypos += 24;
     for (let j = 0; j < 16; j++) {
       patterns.push(new Array(16).fill(0));
@@ -121,7 +121,7 @@ function setup() {
   for (let i = 0; i < 4; i++) {
     let id = ("0" + i).slice(-2)
     pattnames.push("workspace " + id + " 16");
-    globalButtons.push(new VariableTextButton(()=>getPatternName(i+16), 550, ypos, 160, ()=>setCurrentPattern(i+16)));
+    globalButtons.push(new VariableTextButton(()=>getPatternName(i+16), 550, ypos, 160, HT_6, ()=>setCurrentPattern(i+16)));
     ypos += 24;
     for (let j = 0; j < 16; j++) {
       patterns.push(new Array(16).fill(0));
@@ -129,7 +129,7 @@ function setup() {
   }
 
   for (let i = 0; i < 16 * 8; i++) {
-    globalButtons.push(new StepButton((int)(i / 16), i & 15, querySequence, setSequence));
+    globalButtons.push(new StepButton((int)(i / 16), i & 15, HT_7, querySequence, setSequence));
   }
 
 
