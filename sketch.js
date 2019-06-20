@@ -181,7 +181,9 @@ function mousePressed() {
 
 function savePatternData () {
   let strings = []
+  strings.push("const unsigned char pattern[256] PROGMEM = {");
   for (let patt = 0; patt < 16; ++patt) {
+    strings.push("");
     for (let step = 0; step < 16; ++step) {
       var name = '';
       if (step == 0) { 
@@ -191,5 +193,6 @@ function savePatternData () {
       strings.push( 'B' + ('00000000' + (patterns[patt][step] >>> 0).toString(2)).slice(-8) + ',' + name );
     }
   }
+  strings.push("};");
   saveStrings(strings, "patterns.txt");
 }
