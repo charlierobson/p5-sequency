@@ -122,7 +122,7 @@ VariableTextButton.prototype.mouseClicked = function () {
 // ----------------------------------------------------------------------------------------
 
 const StepButton = function (inst, step, toolTip, querySeq, updateSeq) {
-    Buttonx.call(this, step * 32 + 24, inst * 32 + 50, 16, 16, toolTip);
+    Buttonx.call(this, step * 32 + 75, inst * 32 + 50, 16, 16, toolTip);
     this.step = step;
     this.inst = inst;
     this.querySeq = querySeq;
@@ -150,4 +150,60 @@ StepButton.prototype.mouseClicked = function () {
     if (this.state == 1) {
         this.updateSeq(this.inst, this.step, 1 - this.querySeq(this.inst, this.step));
     }
+}
+
+// ----------------------------------------------------------------------------------------
+
+
+const AbletonButton = function (x, y, r, minv, maxv, toolTip, onChangeFN) {
+    Buttonx.call(this, x, y, r, r, toolTip);
+    this.r = r;
+    this.minv = minv;
+    this.maxv = maxv;
+    this.rt = PI;
+    this.lastY = y;
+    this.onChangeFN = onChangeFN;
+    this.val = int(map(this.rt, (2*PI)/12, 11*(2*PI)/12, this.minv, this.maxv));
+}
+
+AbletonButton.prototype = Object.create(Buttonx.prototype);
+
+AbletonButton.prototype.draw = function () {
+    push();
+    translate(this.x,this.y);
+
+    fill(255);
+
+    stroke(0);
+    if (this.state == 1) {
+        stroke(color(0, 128, 0));
+    }
+    ellipse(0, 0, this.r, this.r);
+
+    rotate(this.rt);
+    stroke(0);
+    line(0,0,0,this.r/2);
+    pop();
+
+    fill(0);
+    textAlign(CENTER, CENTER);
+    text(this.val, this.x - 100, this.y + 16, 200, 32);  
+}
+
+AbletonButton.prototype.mouseWithin = function () {
+    return dist(mouseX, mouseY, this.x, this.y) < this.r;
+}
+
+AbletonButton.prototype.mouseDragged = function () {
+    if (this.state != 1) return;
+
+    dy = mouseY - this.lastY;
+    this.lastY = mouseY;
+    this.rt -= 0.1 * dy;
+
+    if (this.rt < (2*PI)/12) this.rt = (2*PI)/12;
+    if (this.rt > (11*(2*PI)/12)) this.rt = 11*(2*PI)/12;
+
+    this.val = int(map(this.rt, (2*PI)/12, 11*(2*PI)/12, this.minv, this.maxv));
+    this.onChangeFN(this.val);
 }

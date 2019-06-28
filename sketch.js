@@ -111,7 +111,7 @@ function setup() {
   for (let i = 0; i < 16; i++) {
     let id = ("0" + i).slice(-2)
     pattnames.push("pattern " + id + " 16");
-    globalButtons.push(new VariableTextButton(()=>getPatternName(i), 550, ypos, 160, HT_6, ()=>setCurrentPattern(i)));
+    globalButtons.push(new VariableTextButton(()=>getPatternName(i), 600, ypos, 160, HT_6, ()=>setCurrentPattern(i)));
     ypos += 24;
     for (let j = 0; j < 16; j++) {
       patterns.push(new Array(16).fill(0));
@@ -121,7 +121,7 @@ function setup() {
   for (let i = 0; i < 4; i++) {
     let id = ("0" + i).slice(-2)
     pattnames.push("workspace " + id + " 16");
-    globalButtons.push(new VariableTextButton(()=>getPatternName(i+16), 550, ypos, 160, HT_6, ()=>setCurrentPattern(i+16)));
+    globalButtons.push(new VariableTextButton(()=>getPatternName(i+16), 600, ypos, 160, HT_6, ()=>setCurrentPattern(i+16)));
     ypos += 24;
     for (let j = 0; j < 16; j++) {
       patterns.push(new Array(16).fill(0));
@@ -132,6 +132,7 @@ function setup() {
     globalButtons.push(new StepButton((int)(i / 16), i & 15, HT_7, querySequence, setSequence));
   }
 
+  globalButtons.push(new AbletonButton(500,500, 30, 60, 180, "YOU KNOW ABLETON, RIGHT?", (val)=>{tempo = val}));
 
   this.step = 0;
   this.tempo = 120;
@@ -160,7 +161,7 @@ function draw() {
   if (this.playing) {
     fill(color(240,240,20));
     noStroke();
-    rect(this.step * 32 + 20, 46, 24, 8 * 32 + 8)
+    rect(this.step * 32 + 71, 44, 24, 8 * 32)
   }
 
   tellButtons((x) => { x.draw(); })
@@ -169,7 +170,7 @@ function draw() {
   strokeWeight(1);
   for (let i = 0; i < 20; ++i) {
     fill(0,40 + (i == pattern ? 200 : 0),0);
-    ellipse(720, i * 24 + 60, 10, 10);
+    ellipse(770, i * 24 + 60, 10, 10);
   }
 };
 
