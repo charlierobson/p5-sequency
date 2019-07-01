@@ -181,7 +181,7 @@ function draw() {
   if (this.playing) {
     fill(color(240,240,20));
     noStroke();
-    rect(this.step * 32 + 71, 44, 24, 8 * 32)
+    rect(this.step * 32 + 92, 44, 24, 8 * 32)
   }
 
   tellButtons((x) => { x.draw(); })
