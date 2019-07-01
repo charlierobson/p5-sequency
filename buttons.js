@@ -1,3 +1,13 @@
+function drawTT(toolTip) {
+    textAlign(LEFT, TOP);
+    fill(0);
+    noStroke();
+    let texts = toolTip.split('|');
+    for (let i = 0; i < texts.length; ++i) {
+        text(texts[i], 75, 400 + 16 * i);
+    }
+}
+
 const Buttonx = function (x, y, w, h, toolTip) {
     this.x = x
     this.y = y
@@ -19,13 +29,7 @@ Buttonx.prototype.showHilite = function () {
     noFill();
     stroke(color(0, 255, 0));
     rect(this.x - 1, this.y - 1, this.w + 2, this.h + 2);
-    textAlign(LEFT, TOP);
-    fill(0);
-    noStroke();
-    let texts = this.toolTip.split('|');
-    for (let i = 0; i < texts.length; ++i) {
-        text(texts[i], 24, 500 + 16 * i);
-    }
+    drawTT(this.toolTip)
 }
 
 Buttonx.prototype.draw = function () {
@@ -93,6 +97,42 @@ TextButton.prototype.mouseClicked = function () {
 
 // ----------------------------------------------------------------------------------------
 
+const PatternButton = function (id, x, y, toolTip) {
+    Buttonx.call(this, x, y, 120, 16, toolTip);
+    this.id = id;
+}
+
+PatternButton.prototype = Object.create(Buttonx.prototype);
+
+PatternButton.prototype.draw = function () {
+    fill(200);
+    noStroke();
+    rect(this.x, this.y, this.w, this.h);
+    fill(0);
+    textAlign(CENTER, CENTER);
+    text(getPatternName(this.id), this.x, this.y, this.w, this.h);
+    
+    stroke(0);
+    strokeWeight(1);
+    fill(0,40,0);
+    if (getSelectedPattern() == this.id) {
+        fill(0,240,0);
+    }
+    ellipse(this.x + this.w - 7, this.y + 8, 10, 10);
+    
+    if (this.state == 1) {
+        this.showHilite();
+    }
+}
+
+PatternButton.prototype.mouseClicked = function () {
+    if (this.state == 1) {
+        setCurrentPattern(this.id);
+    }
+}
+
+// ----------------------------------------------------------------------------------------
+
 const VariableTextButton = function (textfn, x, y, w, toolTip, thingToDo) {
     Buttonx.call(this, x, y, w, 16, toolTip);
     this.thingToDo = thingToDo;
@@ -122,7 +162,7 @@ VariableTextButton.prototype.mouseClicked = function () {
 // ----------------------------------------------------------------------------------------
 
 const StepButton = function (inst, step, toolTip, querySeq, updateSeq) {
-    Buttonx.call(this, step * 32 + 75, inst * 32 + 50, 16, 16, toolTip);
+    Buttonx.call(this, step * 32 + 96, inst * 32 + 50, 16, 16, toolTip);
     this.step = step;
     this.inst = inst;
     this.querySeq = querySeq;
@@ -187,7 +227,9 @@ AbletonButton.prototype.draw = function () {
 
     fill(0);
     textAlign(CENTER, CENTER);
-    text(this.val, this.x - 100, this.y + 16, 200, 32);  
+    text(this.val, this.x - 100, this.y + 16, 200, 32);
+
+    if (this.state == 1) drawTT(this.toolTip)
 }
 
 AbletonButton.prototype.mouseWithin = function () {

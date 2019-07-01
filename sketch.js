@@ -2,7 +2,8 @@ var pattern;
 var pattlen;
 var patterns = [];
 var pattnames = [];
-let instruments = [];
+var instruments = [];
+var insNames = [];
 var pcopybuffer = [];
 var globalButtons = [];
 
@@ -13,17 +14,27 @@ const HT_3 = "Play the sequence";
 const HT_4 = "Stop playing";
 const HT_5 = "Save the patterns, excluding workspaces, for inclusion in O2 source";
 const HT_6 = "Select this pattern|(+SHIFT) OR this pattern into selected|(+ALT) XOR this pattern into selected";
+const HT_65 = "Select this pattern|(+SHIFT) OR this pattern into selected|(+ALT) XOR this pattern into selected|Note: Workspace slots are not saved or loaded!";
 const HT_7 = "Toggle instrument for the step position";
+const HT_8 = "Tempo adjust by click and drag up/down";
 
 function preload() {
   soundFormats('wav');
+  insNames.push("QUIHA");
   instruments[0] = loadSound('assets/01');
+  insNames.push("SNARE");
   instruments[1] = loadSound('assets/02');
+  insNames.push("MARACA");
   instruments[2] = loadSound('assets/03');
+  insNames.push("COWBELL");
   instruments[3] = loadSound('assets/04');
+  insNames.push("CLOSEDHH");
   instruments[4] = loadSound('assets/05');
+  insNames.push("KICK");
   instruments[5] = loadSound('assets/06');
+  insNames.push("OPENHH");
   instruments[6] = loadSound('assets/07');
+  insNames.push("GUIRO");
   instruments[7] = loadSound('assets/08');
 };
 
@@ -78,11 +89,20 @@ function setCurrentPattern(patt) {
   } else {
     pattern = patt;
     pattlen = parseInt(pattnames[pattern].slice(-2));
-  }
+
+    console.log(pattlen);
+    if (isNaN(pattlen))
+      pattlen = 16;
+    console.log(pattlen);
+    }
 }
 
 function getPatternName(patt) {
   return pattnames[patt];
+}
+
+function getSelectedPattern() {
+  return pattern;
 }
 
 function startPlaying() {
@@ -99,40 +119,38 @@ function setup() {
   noSmooth();
 
   globalButtons = [
-    new TextButton("COPY", 24 + (0 * 100), 408, HT_0, () => { pcopybuffer = [...patterns[pattern]]; }),
-    new TextButton("CLEAR", 24 + (1 * 100), 408, HT_1, () => { patterns[pattern] = new Array(16).fill(0); }),
-    new TextButton("PASTE", 24 + (2 * 100), 408, HT_2, () => { patterns[pattern] = [...pcopybuffer]; }),
-    new TextButton("PLAY", 24 + (0 * 100), 432, HT_3, () => { startPlaying(); }),
-    new TextButton("STOP", 24 + (1 * 100), 432, HT_4, () => { this.playing = false; }),
-    new TextButton("SAVE", 24 + (2 * 100), 432, HT_5, () => { savePatternData(); })
+    new TextButton("COPY", 75 + (0 * 96), 338, HT_0, () => { pcopybuffer = [...patterns[pattern]]; }),
+    new TextButton("CLEAR", 75 + (1 * 96), 338, HT_1, () => { patterns[pattern] = new Array(16).fill(0); }),
+    new TextButton("PASTE", 75 + (2 * 96), 338, HT_2, () => { patterns[pattern] = [...pcopybuffer]; }),
+    new TextButton("PLAY", 75 + (0 * 96), 338 + 24, HT_3, () => { startPlaying(); }),
+    new TextButton("STOP", 75 + (1 * 96), 338 + 24, HT_4, () => { this.playing = false; }),
+    new TextButton("SAVE", 75 + (2 * 96), 338 + 24, HT_5, () => { savePatternData(); })
   ]
 
   var ypos = 50;
   for (let i = 0; i < 16; i++) {
     let id = ("0" + i).slice(-2)
     pattnames.push("pattern " + id + " 16");
-    globalButtons.push(new VariableTextButton(()=>getPatternName(i), 600, ypos, 160, HT_6, ()=>setCurrentPattern(i)));
+    globalButtons.push(new PatternButton(i, 640, ypos, HT_6));
     ypos += 24;
-    for (let j = 0; j < 16; j++) {
-      patterns.push(new Array(16).fill(0));
-    }
+
+    patterns.push(new Array(16).fill(0));
   }
 
+  ypos = 338;
   for (let i = 0; i < 4; i++) {
     let id = ("0" + i).slice(-2)
-    pattnames.push("workspace " + id + " 16");
-    globalButtons.push(new VariableTextButton(()=>getPatternName(i+16), 600, ypos, 160, HT_6, ()=>setCurrentPattern(i+16)));
+    pattnames.push("w/space " + id + " 16");
+    globalButtons.push(new PatternButton(i + 16, 500, ypos, HT_65));
     ypos += 24;
-    for (let j = 0; j < 16; j++) {
-      patterns.push(new Array(16).fill(0));
-    }
+    patterns.push(new Array(16).fill(0));
   }
 
   for (let i = 0; i < 16 * 8; i++) {
     globalButtons.push(new StepButton((int)(i / 16), i & 15, HT_7, querySequence, setSequence));
   }
 
-  globalButtons.push(new AbletonButton(500,500, 30, 60, 180, "YOU KNOW ABLETON, RIGHT?", (val)=>{tempo = val}));
+  globalButtons.push(new AbletonButton(400, 354, 30, 60, 180, HT_8, (val)=>{tempo = val}));
 
   this.step = 0;
   this.tempo = 120;
@@ -144,8 +162,10 @@ function setup() {
 };
 
 function draw() {
-  if (this.playing && millis() >= this.nextStepTime) {
-    this.nextStepTime = millis() + 15000 / this.tempo;
+  let millisNow = millis();
+
+  if (this.playing && millisNow >= this.nextStepTime) {
+    this.nextStepTime += int(floor(15000 / this.tempo));
 
     step = (step + 1) % pattlen;
     let col = patterns[pattern][step];
@@ -166,11 +186,9 @@ function draw() {
 
   tellButtons((x) => { x.draw(); })
 
-  stroke(1);
-  strokeWeight(1);
-  for (let i = 0; i < 20; ++i) {
-    fill(0,40 + (i == pattern ? 200 : 0),0);
-    ellipse(770, i * 24 + 60, 10, 10);
+  textAlign(RIGHT, CENTER);
+  for (let i = 0; i < insNames.length; i++) {
+    text(insNames[i], 0, 32 * i + 50, 75, 16);
   }
 };
 
