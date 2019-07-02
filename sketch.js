@@ -38,26 +38,30 @@ function preload() {
   instruments[7] = loadSound('assets/08');
 };
 
-function filedropped(dropped) {
-  if (dropped.type === 'text') {
-    var patt = 0;
-    var step = 0;
-    let strings = dropped.data.split('\n');
-    for (let strg of strings) {
-      let ts = strg.trim();
-      let nameo = ts.indexOf('//');
-      if (nameo != -1) {
-        pattnames[patt] = ts.substring(nameo+2).trim();
-      }
-      if (ts.startsWith('B')) {
-        patterns[patt][step] = parseInt(ts.substring(1,9), 2);
-        ++step;
-        if (step == 16) {
-          ++patt;
-          step = 0;
-        }
+function loadPatterns(strings) {
+  console.log(strings);
+  var patt = 0;
+  var step = 0;
+  for (let strg of strings) {
+    let ts = strg.trim();
+    let nameo = ts.indexOf('//');
+    if (nameo != -1) {
+      pattnames[patt] = ts.substring(nameo+2).trim();
+    }
+    if (ts.startsWith('B')) {
+      patterns[patt][step] = parseInt(ts.substring(1,9), 2);
+      ++step;
+      if (step == 16) {
+        ++patt;
+        step = 0;
       }
     }
+  }
+}
+
+function filedropped(dropped) {
+  if (dropped.type === 'text') {
+    loadPatterns(dropped.data.split('\n'));
   }
 };
 
@@ -115,6 +119,8 @@ function setup() {
   let c = createCanvas(800, 600);
 
   c.drop(filedropped)
+
+  loadStrings("assets/patterns.txt", loadPatterns)
 
   noSmooth();
 
